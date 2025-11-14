@@ -45,6 +45,7 @@ class AuthController extends Controller
                 'name' => $validated['name'],
                 'email' => $validated['email'],
                 'password' => Hash::make($validated['password']),
+                'status' => 'user',
             ]);
 
             if ($request->hasFile('profile_image'))
@@ -68,6 +69,7 @@ class AuthController extends Controller
                 }
             }
 
+            Auth::login($user);
             $user->load('profileImage');
 
             return redirect()->route('welcome', ['userId' => $user->id])->with('success', 'Registration successful!');
@@ -78,5 +80,40 @@ class AuthController extends Controller
             Log::critical($exception->getMessage());
             return redirect()->back()->withErrors([$exception->getMessage()]);
         }
+    }
+
+    public function loginView(): View
+    {
+        return view('auth.login');
+    }
+
+    public function login(Request $request): RedirectResponse
+    {
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string|min:8',
+        ], [
+            'email.required' => 'Email address is required.',
+            'email.email' => 'Please enter a valid email address.',
+            'password.required' => 'Password is required.',
+            'password.min' => 'Password must be at least 8 characters.',
+        ]);
+
+        if (Auth::attempt($credentials, $request->boolean('remember'))) {
+            $request->session()->regenerate();
+            return redirect()->route('welcome')->with('success', 'Login successful!');
+        }
+
+        return back()->withErrors([
+            'email' => 'The provided credentials do not match our records.',
+        ])->onlyInput('email');
+    }
+
+    public function logout(Request $request): RedirectResponse
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+        return redirect()->route('welcome')->with('success', 'Logged out successfully!');
     }
 }
