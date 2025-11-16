@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register</title>
+    <title>Login</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
@@ -13,7 +13,7 @@
             display: flex;
             align-items: center;
         }
-        .register-container {
+        .login-container {
             max-width: 400px;
             width: 100%;
         }
@@ -23,10 +23,10 @@
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-6">
-                <div class="register-container">
+                <div class="login-container">
                     <div class="card shadow">
                         <div class="card-body p-5">
-                            <h2 class="text-center mb-4">Register</h2>
+                            <h2 class="text-center mb-4">Login</h2>
                             
                             @if ($errors->any())
                                 <div class="alert alert-danger">
@@ -42,41 +42,34 @@
                                 </div>
                             @endif
 
-                            <form method="POST" action="{{ route('register') }}" enctype="multipart/form-data">
+                            <form method="POST" action="{{ route('login') }}">
                                 @csrf
                                 
                                 <div class="mb-3">
-                                    <label for="name" class="form-label">Name</label>
-                                    <input type="text" name="name" id="name" value="{{ old('name') }}" 
+                                    <label for="email" class="form-label">Email Address</label>
+                                    <input type="email" name="email" id="email" value="{{ old('email') }}" 
                                            class="form-control" required autofocus>
                                 </div>
 
-                                <div class="mb-3">
-                                    <label for="email" class="form-label">Email Address</label>
-                                    <input type="email" name="email" id="email" value="{{ old('email') }}" 
-                                           class="form-control" required>
-                                </div>
-
-                                <div class="mb-3">
+                                <div class="mb-4">
                                     <label for="password" class="form-label">Password</label>
                                     <input type="password" name="password" id="password" 
                                            class="form-control" required>
                                 </div>
 
-                                <div class="mb-4">
-                                    <label for="profile_image" class="form-label">Profile Image (Optional)</label>
-                                    <input type="file" name="profile_image" id="profile_image" 
-                                           class="form-control">
+                                <div class="mb-3 form-check">
+                                    <input type="checkbox" name="remember" id="remember" class="form-check-input">
+                                    <label for="remember" class="form-check-label">Remember me</label>
                                 </div>
 
                                 <button type="submit" class="btn btn-primary w-100 py-2">
-                                    Register
+                                    Login
                                 </button>
                             </form>
 
                             <div class="mt-4 text-center">
-                                <p class="text-muted mb-0">Already have an account? 
-                                    <a href="{{ route('login.view') }}" class="text-decoration-none">Login here</a>
+                                <p class="text-muted mb-0">Don't have an account? 
+                                    <a href="{{ route('register.view') }}" class="text-decoration-none">Register here</a>
                                 </p>
                             </div>
                         </div>

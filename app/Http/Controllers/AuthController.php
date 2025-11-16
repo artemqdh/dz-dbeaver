@@ -12,6 +12,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Validation\Rules\File;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
@@ -26,7 +27,7 @@ class AuthController extends Controller
             'name' => 'required|string|max:255|min:2',
             'email' => 'required|string|email|max:100|unique:users,email',
             'password' => 'required|string|min:8|max:100',
-            'profile_image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // Only one image allowed
+            'profile_image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ], [
             'name.required' => 'Your name is required.',
             'email.required' => 'Your email address is required.',
@@ -72,7 +73,7 @@ class AuthController extends Controller
             Auth::login($user);
             $user->load('profileImage');
 
-            return redirect()->route('welcome', ['userId' => $user->id])->with('success', 'Registration successful!');
+            return redirect()->route('welcome')->with('success', 'Registration successful!');
 
         }
         catch (\Exception $exception)
@@ -105,7 +106,7 @@ class AuthController extends Controller
         }
 
         return back()->withErrors([
-            'email' => 'The provided credentials do not match our records.',
+            'email' => 'Error. Mail or Password incorrect.',
         ])->onlyInput('email');
     }
 
