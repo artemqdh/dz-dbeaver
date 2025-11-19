@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use App\Models\UserImage;
+use App\Models\PostComment;
 use App\Models\Post;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -20,7 +21,7 @@ class DatabaseSeeder extends Seeder
         User::factory()
             ->count(5)
             ->has(UserImage::factory()->count(1), 'profileImage')
-            ->has(Post::factory()->count(3), 'posts')
+            ->has(Post::factory()->count(3)->has(PostComment::factory()->count(2), 'comments'), 'posts')
             ->create();
     }
 }

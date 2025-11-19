@@ -86,12 +86,78 @@
 
                                 <p class="card-text post-content">{{ $post->content }}</p>
 
+                                <div class="mt-4">
+                                    @auth
+                                        <form method="POST" action="{{ route('comments.store') }}" class="mb-3">
+                                            @csrf
+                                            <input type="hidden" name="post_id" value="{{ $post->id }}">
+                                            <div class="input-group input-group-sm">
+                                                <input type="text" name="comment" class="form-control" placeholder="Write a comment..." required>
+                                                <button type="submit" class="btn btn-primary">Comment</button>
+                                            </div>
+                                        </form>
+                                    @endauth
+
+                                    @if($post->comments->count() > 0)
+                                        <div class="comments-section">
+                                            @foreach($post->comments as $comment)
+                                                <div class="d-flex align-items-start mb-2">
+                                                    @if($comment->user->profileImage)
+                                                        <img src="{{ Storage::url($comment->user->profileImage->path) }}" 
+                                                             alt="{{ $comment->user->name }}"
+                                                             class="rounded-circle me-2" 
+                                                             style="width: 30px; height: 30px; object-fit: cover;">
+                                                    @else
+                                                        <div class="user-avatar me-2" style="width: 30px; height: 30px; font-size: 12px;">
+                                                            {{ substr($comment->user->name, 0, 1) }}
+                                                        </div>
+                                                    @endif
+                                                    <div class="flex-grow-1">
+                                                        <div class="bg-light rounded p-2">
+                                                            <strong>{{ $comment->user->name }}</strong>
+                                                            <p class="mb-1">{{ $comment->comment }}</p>
+                                                            <small class="text-muted">{{ $comment->created_at->format('M j, g:i A') }}</small>
+                                                            @auth
+                                                                @if(Auth::id() === $comment->user_id)
+                                                                    <form method="POST" action="{{ route('comments.destroy', $comment) }}" class="d-inline">
+                                                                        @csrf
+                                                                        @method('DELETE')
+                                                                        <button type="submit" class="btn btn-sm btn-outline-danger ms-2" 
+                                                                                onclick="return confirm('Delete this comment?')">
+                                                                            Delete
+                                                                        </button>
+                                                                    </form>
+                                                                @endif
+                                                            @endauth
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                </div>
+
                                 <div class="d-flex justify-content-between align-items-center mt-3">
                                     <div>
                                         <button class="btn btn-sm btn-outline-secondary me-2">Like</button>
-                                        <button class="btn btn-sm btn-outline-secondary">Comment</button>
                                     </div>
-                                    <small class="text-muted">#{{ $post->id }}</small>
+                                    <div>
+                                        @auth
+                                            @if(Auth::id() === $post->user_id)
+                                                <a href="{{ route('posts.edit', $post) }}" class="btn btn-sm btn-outline-primary me-2">Edit</a>
+
+                                                <form method="POST" action="/posts/{{ $post->id }}" class="d-inline">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                                            onclick="return confirm('Are you sure you want to delete this post?')">
+                                                        Delete
+                                                    </button>
+                                                </form>
+                                            @endif
+                                        @endauth
+                                        <small class="text-muted">#{{ $post->id }}</small>
+                                    </div>
                                 </div>
                             </div>
                         </div>

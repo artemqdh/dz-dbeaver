@@ -62,4 +62,9 @@ class User extends Authenticatable
     {
         $this->attributes['avatar'] = $value ?? '/images/default-avatar.png';
     }
+
+    public function comments()
+    {
+        return $this->hasMany(PostComment::class);
+    }
 }

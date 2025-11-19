@@ -37,4 +37,41 @@ class PostController extends Controller
     {
         return view('posts.show', compact('post'));
     }
+
+    public function edit(Post $post)
+    {
+        if ($post->user_id !== Auth::id()) {
+            abort(403);
+        }
+        return view('posts.edit', compact('post'));
+    }
+
+    public function update(Request $request, Post $post)
+    {
+        if ($post->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $request->validate([
+            'content' => 'required|string|max:1000',
+        ]);
+
+        $post->update([
+            'content' => $request->content
+        ]);
+
+        return redirect()->route('posts.index')->with('success', 'Post updated successfully!');
+    }
+
+    public function destroy(Post $post)
+    {
+        $isAdmin = Auth::user()->status === 'admin';
+        if ($post->user_id !== Auth::id() && !$isAdmin) {
+            abort(403);
+        }
+
+        $post->delete();
+
+        return redirect()->route('posts.index')->with('success', 'Post deleted successfully!');
+    }
 }
