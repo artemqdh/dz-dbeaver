@@ -38,3 +38,4 @@ Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.
 // Comment Routes
 Route::post('/comments', [PostCommentController::class, 'store'])->name('comments.store');
 Route::delete('/comments/{comment}', [PostCommentController::class, 'destroy'])->name('comments.destroy');
+Route::put('/comments/{comment}', [PostCommentController::class, 'update'])->name('comments.update');

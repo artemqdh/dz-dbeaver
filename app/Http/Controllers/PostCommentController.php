@@ -25,6 +25,25 @@ class PostCommentController extends Controller
         return redirect()->route('posts.index')->with('success', 'Comment added successfully!');
     }
 
+    public function update(PostComment $comment, Request $request) : RedirectResponse
+    {
+         $validated = $request->validate([
+            'comment' => 'required|min:2|max:255',
+        ]);
+
+        if ($comment->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $comment->update([
+            'comment' => $validated['comment'],
+        ]);
+
+        return redirect()
+            ->route('posts.index', $comment->post_id)
+            ->with('success', 'Comment updates successfully!');
+    }
+
     public function destroy(PostComment $comment): RedirectResponse
     {
         if ($comment->user_id !== Auth::id()) {
