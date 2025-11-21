@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Validation\Rules\File;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\VerifyEmail;
 
 class AuthController extends Controller
 {
@@ -70,10 +72,10 @@ class AuthController extends Controller
                 }
             }
 
-            Auth::login($user);
+            Mail::to($user->email)->send(new VerifyEmail($user));
             $user->load('profileImage');
 
-            return redirect()->route('welcome')->with('success', 'Registration successful!');
+            return redirect()->route('welcome')->with('success', 'Registration successful! Please check your email to verify your account.');
 
         }
         catch (\Exception $exception)
@@ -88,11 +90,11 @@ class AuthController extends Controller
         return view('auth.login');
     }
 
-    public function login(Request $request): RedirectResponse
+    public function login(Request $request) : RedirectResponse
     {
         $credentials = $request->validate([
             'email' => 'required|email',
-            'password' => 'required|string|min:8',
+            'password' => 'required'
         ], [
             'email.required' => 'Email address is required.',
             'email.email' => 'Please enter a valid email address.',
@@ -100,14 +102,19 @@ class AuthController extends Controller
             'password.min' => 'Password must be at least 8 characters.',
         ]);
 
-        if (Auth::attempt($credentials, $request->boolean('remember'))) {
-            $request->session()->regenerate();
+        if (Auth::attempt($credentials))
+        {
+            $user = Auth::user();
+
+            if ($user->email_verified_at === null)
+            {
+                Auth::logout();
+                return back()->with('error', 'Please verify your email before logging in.');
+            }
+
             return redirect()->route('welcome')->with('success', 'Login successful!');
         }
-
-        return back()->withErrors([
-            'email' => 'Error. Mail or Password incorrect.',
-        ])->onlyInput('email');
+        return back()->with('error', 'Invalid email or password.');
     }
 
     public function logout(Request $request): RedirectResponse

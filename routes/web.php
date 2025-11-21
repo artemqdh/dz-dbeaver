@@ -6,6 +6,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\PostCommentController;
+use App\Http\Controllers\VerifyController;
 
 Route::get('/', [HomeController::class, 'welcome'])->name('welcome');
 
@@ -39,3 +40,6 @@ Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.
 Route::post('/comments', [PostCommentController::class, 'store'])->name('comments.store');
 Route::delete('/comments/{comment}', [PostCommentController::class, 'destroy'])->name('comments.destroy');
 Route::put('/comments/{comment}', [PostCommentController::class, 'update'])->name('comments.update');
+
+// Verify Mail
+Route::get('/verify-email/{id}/{hash}', [VerifyController::class, 'verify'])->middleware('signed')->name('verification.verify');
