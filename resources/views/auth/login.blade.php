@@ -73,6 +73,10 @@
                                 </button>
                             </form>
 
+                            <div class="text-center mt-3">
+                                <a href="{{ route('password.request') }}" class="text-decoration-none">Forgot your password?</a>
+                            </div>
+
                             <div class="mt-4 text-center">
                                 <p class="text-muted mb-0">Don't have an account? 
                                     <a href="{{ route('register.view') }}" class="text-decoration-none">Register here</a>

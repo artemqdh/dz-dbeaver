@@ -43,3 +43,9 @@ Route::put('/comments/{comment}', [PostCommentController::class, 'update'])->nam
 
 // Verify Mail
 Route::get('/verify-email/{id}/{hash}', [VerifyController::class, 'verify'])->middleware('signed')->name('verification.verify');
+
+// Password Reset Routes
+Route::get('/forgot-password', [AuthController::class, 'showForgotPasswordForm'])->name('password.request');
+Route::post('/forgot-password', [AuthController::class, 'sendResetLinkEmail'])->name('password.email');
+Route::get('/reset-password/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
+Route::post('/reset-password', [AuthController::class, 'reset'])->name('password.update');
