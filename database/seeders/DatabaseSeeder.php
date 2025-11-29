@@ -18,10 +18,16 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->call([
+            CategorySeeder::class,
+        ]);
+
         User::factory()
             ->count(5)
             ->has(UserImage::factory()->count(1), 'profileImage')
-            ->has(Post::factory()->count(3)->has(PostComment::factory()->count(2), 'comments'), 'posts')
+            ->has(Post::factory()->count(3)->state(function (array $attributes) {
+                return ['category_id' => \App\Models\Category::inRandomOrder()->first()->id];
+            }), 'posts')
             ->create();
     }
 }

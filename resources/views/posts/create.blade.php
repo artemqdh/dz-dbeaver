@@ -38,6 +38,16 @@
                                         required placeholder="What's on your mind?">{{ old('content') }}</textarea>
                             </div>
 
+                            <div class="mb-3">
+                                <label for="category_id" class="form-label">Category</label>
+                                <select name="category_id" id="category_id" class="form-select" required>
+                                    <option value="">Select a category</option>
+                                    @foreach($categories as $category)
+                                        <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
                             <div class="d-flex gap-2">
                                 <button type="submit" class="btn btn-primary">
                                     Publish Post

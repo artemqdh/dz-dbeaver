@@ -8,26 +8,38 @@ use Illuminate\Support\Facades\Auth;
 
 class PostController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $posts = Post::with('user')->latest()->paginate(10);
-        return view('posts.index', compact('posts'));
+        $categories = \App\Models\Category::all();
+        $selectedCategory = $request->get('category');
+        
+        $posts = Post::with(['user', 'category'])
+                    ->when($selectedCategory, function ($query) use ($selectedCategory) {
+                        return $query->where('category_id', $selectedCategory);
+                    })
+                    ->latest()
+                    ->paginate(10);
+
+        return view('posts.index', compact('posts', 'categories', 'selectedCategory'));
     }
 
     public function create()
     {
-        return view('posts.create');
+        $categories = \App\Models\Category::all();
+        return view('posts.create', compact('categories'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
             'content' => 'required|string|max:1000',
+            'category_id' => 'required|exists:categories,id'
         ]);
 
         Post::create([
             'content' => $request->content,
             'user_id' => Auth::id(),
+            'category_id' => $request->category_id
         ]);
 
         return redirect()->route('posts.index')->with('success', 'Post created successfully!');

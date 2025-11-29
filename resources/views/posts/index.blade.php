@@ -56,6 +56,23 @@
                 @endauth
             </div>
 
+            <div class="mb-4">
+                <div class="d-flex flex-wrap gap-2 align-items-center">
+                    <strong>Filter by:</strong>
+                    <a href="{{ route('posts.index') }}" 
+                    class="btn btn-sm {{ !$selectedCategory ? 'btn-primary' : 'btn-outline-primary' }}">
+                        All Posts
+                    </a>
+                    @foreach($categories as $category)
+                        <a href="{{ route('posts.index', ['category' => $category->id]) }}" 
+                        class="btn btn-sm {{ $selectedCategory == $category->id ? 'btn-primary' : 'btn-outline-primary' }}"
+                        style="border-color: {{ $category->color }}; color: {{ $selectedCategory == $category->id ? 'white' : $category->color }}; background-color: {{ $selectedCategory == $category->id ? $category->color : 'transparent' }}">
+                            {{ $category->name }}
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+
             <div id="posts-container">
                 @foreach($posts as $post)
                     <div class="card post-card mb-4 shadow-sm">
@@ -80,6 +97,12 @@
                                     </small>
                                 </div>
                             </div>
+
+                            @if($post->category)
+                                <div class="mb-2">
+                                    <span class="badge" style="background-color: {{ $post->category->color }}">{{ $post->category->name }}</span>
+                                </div>
+                            @endif
 
                             <p class="card-text post-content">{{ $post->content }}</p>
 
