@@ -49,3 +49,22 @@ Route::get('/forgot-password', [AuthController::class, 'showForgotPasswordForm']
 Route::post('/forgot-password', [AuthController::class, 'sendResetLinkEmail'])->name('password.email');
 Route::get('/reset-password/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
 Route::post('/reset-password', [AuthController::class, 'reset'])->name('password.update');
+
+
+Route::get('/test-cache', function() {
+    // Test 1: Store something in cache
+    Cache::put('test_key', 'Hello Cache!', 60);
+    
+    // Test 2: Check if it exists
+    $value = Cache::get('test_key');
+    
+    // Test 3: List cache files
+    $cachePath = storage_path('framework/cache/data');
+    $files = glob($cachePath . '/*');
+    
+    return [
+        'cache_value' => $value,
+        'cache_files_count' => count($files),
+        'cache_files' => $files
+    ];
+});

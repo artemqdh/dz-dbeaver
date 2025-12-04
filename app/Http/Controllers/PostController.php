@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 class PostController extends Controller
 {
@@ -13,12 +14,16 @@ class PostController extends Controller
         $categories = \App\Models\Category::all();
         $selectedCategory = $request->get('category');
         
-        $posts = Post::with(['user', 'category'])
-                    ->when($selectedCategory, function ($query) use ($selectedCategory) {
-                        return $query->where('category_id', $selectedCategory);
-                    })
-                    ->latest()
-                    ->paginate(10);
+        $cacheKey = 'posts:' . ($selectedCategory ? 'category_' . $selectedCategory : 'all');
+        
+        $posts = Cache::remember($cacheKey, 60, function () use ($selectedCategory) {
+            return Post::with(['user', 'category'])
+                ->when($selectedCategory, function ($query) use ($selectedCategory) {
+                    return $query->where('category_id', $selectedCategory);
+                })
+                ->latest()
+                ->paginate(10);
+        });
 
         return view('posts.index', compact('posts', 'categories', 'selectedCategory'));
     }
@@ -47,6 +52,12 @@ class PostController extends Controller
 
     public function show(Post $post)
     {
+        $cacheKey = "post:{$post->id}";
+        
+        $post = Cache::remember($cacheKey, 60, function () use ($post) {
+            return $post->load(['user', 'category', 'comments.user']);
+        });
+
         return view('posts.show', compact('post'));
     }
 
