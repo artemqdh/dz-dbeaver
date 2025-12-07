@@ -2,99 +2,76 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Post;
+use App\Http\Requests\PostStoreRequest;
+use App\Repositories\PostRepository;
+use App\Repositories\CategoryRepository;
+use App\Services\PostService;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\View\View;
 
 class PostController extends Controller
 {
-    public function index(Request $request)
+    public function __construct(
+        private readonly PostRepository $postRepository,
+        private readonly CategoryRepository $categoryRepository,
+        private readonly PostService $postService
+    ) {}
+    
+    public function index(Request $request): View
     {
-        $categories = \App\Models\Category::all();
+        $categories = $this->categoryRepository->getAllCached();
         $selectedCategory = $request->get('category');
         
-        $cacheKey = 'posts:' . ($selectedCategory ? 'category_' . $selectedCategory : 'all');
-        
-        $posts = Cache::remember($cacheKey, 60, function () use ($selectedCategory) {
-            return Post::with(['user', 'category'])
-                ->when($selectedCategory, function ($query) use ($selectedCategory) {
-                    return $query->where('category_id', $selectedCategory);
-                })
-                ->latest()
-                ->paginate(10);
-        });
-
+        $posts = $selectedCategory
+            ? $this->postRepository->getWithCategoryFilter($selectedCategory)
+            : $this->postRepository->getAllPaginated();
+            
         return view('posts.index', compact('posts', 'categories', 'selectedCategory'));
     }
-
-    public function create()
+    
+    public function create(): View
     {
-        $categories = \App\Models\Category::all();
+        $categories = $this->categoryRepository->getAllCached();
         return view('posts.create', compact('categories'));
     }
-
-    public function store(Request $request)
+    
+    public function store(PostStoreRequest $request): RedirectResponse
     {
-        $request->validate([
-            'content' => 'required|string|max:1000',
-            'category_id' => 'required|exists:categories,id'
-        ]);
-
-        Post::create([
-            'content' => $request->content,
-            'user_id' => Auth::id(),
-            'category_id' => $request->category_id
-        ]);
-
-        return redirect()->route('posts.index')->with('success', 'Post created successfully!');
-    }
-
-    public function show(Post $post)
-    {
-        $cacheKey = "post:{$post->id}";
+        $this->postService->createPost($request->validated());
         
-        $post = Cache::remember($cacheKey, 60, function () use ($post) {
-            return $post->load(['user', 'category', 'comments.user']);
-        });
-
+        return redirect()->route('posts.index')
+            ->with('success', 'Post created successfully!');
+    }
+    
+    public function show($id): View
+    {
+        $post = $this->postRepository->getCachedPost($id);
         return view('posts.show', compact('post'));
     }
-
-    public function edit(Post $post)
+    
+    public function edit($id): View
     {
-        if ($post->user_id !== Auth::id()) {
-            abort(403);
-        }
-        return view('posts.edit', compact('post'));
+        $post = $this->postRepository->getCachedPost($id);
+        $this->postService->authorizePost($post);
+        
+        $categories = $this->categoryRepository->getAllCached();
+        return view('posts.edit', compact('post', 'categories'));
     }
-
-    public function update(Request $request, Post $post)
+    
+    public function update(PostStoreRequest $request, $id): RedirectResponse
     {
-        if ($post->user_id !== Auth::id()) {
-            abort(403);
-        }
-
-        $request->validate([
-            'content' => 'required|string|max:1000',
-        ]);
-
-        $post->update([
-            'content' => $request->content
-        ]);
-
-        return redirect()->route('posts.index')->with('success', 'Post updated successfully!');
+        $this->postService->updatePost($id, $request->validated());
+        
+        return redirect()->route('posts.index')
+            ->with('success', 'Post updated successfully!');
     }
-
-    public function destroy(Post $post)
+    
+    public function destroy($id): RedirectResponse
     {
-        $isAdmin = Auth::user()->status === 'admin';
-        if ($post->user_id !== Auth::id() && !$isAdmin) {
-            abort(403);
-        }
-
-        $post->delete();
-
-        return redirect()->route('posts.index')->with('success', 'Post deleted successfully!');
+        $this->postService->deletePost($id);
+        
+        return redirect()->route('posts.index')
+            ->with('success', 'Post deleted successfully!');
     }
 }
