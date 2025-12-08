@@ -46,17 +46,35 @@ class PostRepository
     
     public function store(array $data)
     {
+        Cache::forget('posts:all');
+        if (isset($data['category_id'])) {
+            Cache::forget('posts:category_' . $data['category_id']);
+        }
+        
         return Post::create($data);
     }
     
     public function update(Post $post, array $data)
     {
+        Cache::forget("post:{$post->id}");
+        Cache::forget('posts:all');
+        Cache::forget('posts:category_' . $post->category_id);
+        
         $post->update($data);
+        
+        if (isset($data['category_id']) && $data['category_id'] != $post->getOriginal('category_id')) {
+            Cache::forget('posts:category_' . $data['category_id']);
+        }
+        
         return $post;
     }
     
     public function destroy(Post $post)
     {
+        Cache::forget("post:{$post->id}");
+        Cache::forget('posts:all');
+        Cache::forget('posts:category_' . $post->category_id);
+        
         return $post->delete();
     }
     
@@ -65,5 +83,15 @@ class PostRepository
         return [
             'post' => $post->load(['user', 'category', 'comments.user'])
         ];
+    }
+
+    public function clearAllPostCache(): void
+    {
+        Cache::forget('posts:all');
+        
+        $categories = \App\Models\Category::pluck('id');
+        foreach ($categories as $categoryId) {
+            Cache::forget('posts:category_' . $categoryId);
+        }
     }
 }

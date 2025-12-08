@@ -2,9 +2,11 @@
 
 namespace App\Services;
 
+use App\Models\Post;
 use App\Repositories\PostRepository;
 use App\Repositories\CategoryRepository;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 class PostService
 {
@@ -40,12 +42,10 @@ class PostService
         return $this->postRepository->destroy($post);
     }
     
-    private function authorizePost($post)
+    public function authorizePost(Post $post): void
     {
-        $user = Auth::user();
-        
-        if ($post->user_id !== $user->id && $user->status !== 'admin') {
-            abort(403);
+        if (Gate::denies('manage-post', $post)) {
+            abort(403, 'Unauthorized action.');
         }
     }
 }

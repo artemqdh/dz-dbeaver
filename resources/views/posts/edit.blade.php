@@ -39,6 +39,23 @@
                                         required>{{ old('content', $post->content) }}</textarea>
                             </div>
 
+                            <div class="mb-4">
+                                <label for="category_id" class="form-label">Category</label>
+                                <select name="category_id" id="category_id" class="form-select" required>
+                                    <option value="">Select a category</option>
+                                    @foreach($categories as $category)
+                                        <option value="{{ $category->id }}" 
+                                                {{ old('category_id', $post->category_id) == $category->id ? 'selected' : '' }}
+                                                style="color: {{ $category->color }};">
+                                            {{ $category->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('category_id')
+                                    <div class="text-danger mt-1">{{ $message }}</div>
+                                @enderror
+                            </div>
+
                             <div class="d-flex gap-2">
                                 <button type="submit" class="btn btn-primary">
                                     Update Post

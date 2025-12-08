@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Models\Post;
+use App\Models\User;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -35,6 +38,16 @@ class AppServiceProvider extends ServiceProvider
     
     public function boot(): void
     {
-        // Boot methods
+        Gate::define('manage-post', function (User $user, Post $post) {
+            return $user->isAdmin() || $user->id === $post->user_id;
+        });
+
+        Gate::define('manage-user', function (User $user, User $targetUser) {
+            if ($user->isAdmin()) {
+                return true;
+            }
+            
+            return $user->id === $targetUser->id;
+        });
     }
 }

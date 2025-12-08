@@ -53,17 +53,21 @@
         @auth
             <div class="text-center mt-4">
                 <h2>Hello, {{ Auth::user()->name }}!</h2>
-
-                <h3 class="mt-4">Your Profile Image:</h3>
-                @if (Auth::user()->profileImage)
-                    <img src="{{ Storage::url(Auth::user()->profileImage->path) }}" width="300" class="img-thumbnail mt-2">
-                @else
-                    <p>You haven't uploaded a profile image yet.</p>
-                @endif
             </div>
         @else
             <p class="text-center mt-4">Please log in or register to see personalized content.</p>
         @endif
+
+        @if(auth()->user()->status === 'admin' || auth()->user()->status === 'moderator')
+            <a href="{{ route('users.index') }}" class="btn btn-info btn-lg ms-3">
+                Manage Users
+            </a>
+        @endif
+        
+        <!-- Optional: Add link to user's own profile -->
+        <a href="{{ route('users.show', auth()->id()) }}" class="btn btn-outline-primary btn-lg ms-3">
+            My Profile
+        </a>
 
         <div class="text-center mt-4">
             <a href="{{ route('posts.index') }}" class="btn btn-success btn-lg">

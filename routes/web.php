@@ -7,6 +7,7 @@ use App\Http\Controllers\SearchController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\PostCommentController;
 use App\Http\Controllers\VerifyController;
+use App\Http\Controllers\UserController;
 
 Route::get('/', [HomeController::class, 'welcome'])->name('welcome');
 
@@ -36,6 +37,10 @@ Route::get('/posts/{post}/edit', [PostController::class, 'edit'])->name('posts.e
 Route::put('/posts/{post}', [PostController::class, 'update'])->name('posts.update');
 Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
 
+// User Routes (add after comment routes)
+Route::resource('users', UserController::class);
+Route::get('users/search', [UserController::class, 'index'])->name('users.search');
+
 // Comment Routes
 Route::post('/comments', [PostCommentController::class, 'store'])->name('comments.store');
 Route::delete('/comments/{comment}', [PostCommentController::class, 'destroy'])->name('comments.destroy');
@@ -49,22 +54,3 @@ Route::get('/forgot-password', [AuthController::class, 'showForgotPasswordForm']
 Route::post('/forgot-password', [AuthController::class, 'sendResetLinkEmail'])->name('password.email');
 Route::get('/reset-password/{token}', [AuthController::class, 'showResetForm'])->name('password.reset');
 Route::post('/reset-password', [AuthController::class, 'reset'])->name('password.update');
-
-
-Route::get('/test-cache', function() {
-    // Test 1: Store something in cache
-    Cache::put('test_key', 'Hello Cache!', 60);
-    
-    // Test 2: Check if it exists
-    $value = Cache::get('test_key');
-    
-    // Test 3: List cache files
-    $cachePath = storage_path('framework/cache/data');
-    $files = glob($cachePath . '/*');
-    
-    return [
-        'cache_value' => $value,
-        'cache_files_count' => count($files),
-        'cache_files' => $files
-    ];
-});

@@ -35,9 +35,6 @@
     </style>
 </head>
 <body>
-@php
-    use Illuminate\Support\Facades\Storage;
-@endphp
 
 <div class="container">
     <div class="row justify-content-center">
@@ -79,16 +76,10 @@
                         <div class="card-body">
 
                             <div class="d-flex align-items-center mb-3">
-                                @if($post->user->profileImage)
-                                    <img src="{{ Storage::url($post->user->profileImage->path) }}"
-                                         alt="{{ $post->user->name }}"
-                                         class="rounded-circle me-3"
-                                         style="width: 50px; height: 50px; object-fit: cover;">
-                                @else
-                                    <div class="user-avatar me-3">
-                                        {{ substr($post->user->name, 0, 1) }}
-                                    </div>
-                                @endif
+                                <img src="{{ $post->user->avatar_url }}"
+                                     alt="{{ $post->user->name }}"
+                                     class="rounded-circle me-3"
+                                     style="width: 50px; height: 50px; object-fit: cover;">
 
                                 <div class="flex-grow-1">
                                     <h5 class="card-title mb-1">{{ $post->user->name }}</h5>
@@ -123,16 +114,11 @@
                                         @foreach($post->comments as $comment)
                                             <div class="d-flex align-items-start mb-2">
 
-                                                @if($comment->user->profileImage)
-                                                    <img src="{{ Storage::url($comment->user->profileImage->path) }}"
-                                                         alt="{{ $comment->user->name }}"
-                                                         class="rounded-circle me-2"
-                                                         style="width: 30px; height: 30px; object-fit: cover;">
-                                                @else
-                                                    <div class="user-avatar me-2" style="width: 30px; height: 30px; font-size: 12px;">
-                                                        {{ substr($comment->user->name, 0, 1) }}
-                                                    </div>
-                                                @endif
+                                                {{-- CHANGED: Removed @if check and simplified --}}
+                                                <img src="{{ $comment->user->avatar_url }}"
+                                                     alt="{{ $comment->user->name }}"
+                                                     class="rounded-circle me-2"
+                                                     style="width: 30px; height: 30px; object-fit: cover;">
 
                                                 <div class="flex-grow-1">
                                                     <div class="bg-light rounded p-2">
